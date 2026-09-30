@@ -2,30 +2,32 @@ import { Injectable, Inject } from '@nestjs/common';
 
 import {
   type ChunkTextInput,
-  type LlmChunkingPort,
-  type LlmChunkingProviderName,
+  LlmChunkingProviderName,
   type LlmConfig,
+  type LlmPort,
   LLM_PROVIDER_CONFIG,
 } from '../../domain/ports/llm-chunking.port';
 
-import { fallbackChunkText } from '../../utils/DummySplitters';
+import { DummyChunking, DummyEmbedding } from '../../utils/DummySplitters';
 
 import type { Tokenizer, TransformersModule } from '../types/local_model_types';
 
 @Injectable()
-export class HuggingFaceLocalLlmService implements LlmChunkingPort {
+export class HuggingFaceLocalLlmService implements LlmPort {
 
   public readonly providerName: LlmChunkingProviderName;
   private tokenizer?: Tokenizer;
   constructor(
     @Inject(LLM_PROVIDER_CONFIG) private readonly config: LlmConfig,
-  ) { }
+  ) {
+    this.providerName = LlmChunkingProviderName.huggingface;
+  }
 
   async chunkText(input: ChunkTextInput): Promise<string[]> {
     const tokenizer = await this.getTokenizer();
 
     if (!tokenizer) {
-      return fallbackChunkText(input.text, input.maxChunkLength);
+      return DummyChunking(input.text, input.maxChunkLength);
     }
 
     try {
@@ -53,10 +55,14 @@ export class HuggingFaceLocalLlmService implements LlmChunkingPort {
 
       return chunks.length
         ? chunks
-        : fallbackChunkText(input.text, input.maxChunkLength);
+        : DummyChunking(input.text, input.maxChunkLength);
     } catch {
-      return fallbackChunkText(input.text, input.maxChunkLength);
+      return DummyChunking(input.text, input.maxChunkLength);
     }
+  }
+
+  async embedText(input: string): Promise<number[]> {
+    return DummyEmbedding(input);
   }
 
   private async getTokenizer(): Promise<Tokenizer | undefined> {
@@ -68,9 +74,12 @@ export class HuggingFaceLocalLlmService implements LlmChunkingPort {
       const { AutoTokenizer } =
         (await import('@huggingface/transformers')) as TransformersModule;
 
-      this.tokenizer = (await AutoTokenizer.from_pretrained(this.model, {
+      this.tokenizer = (await AutoTokenizer.from_pretrained(
+        process.env['HUGGINGFACE_LOCAL_MODEL'] ?? 'sentence-transformers/all-MiniLM-L6-v2',
+        {
         local_files_only: true,
-      })) as Tokenizer;
+        },
+      )) as Tokenizer;
       return this.tokenizer;
     } catch {
       return undefined;

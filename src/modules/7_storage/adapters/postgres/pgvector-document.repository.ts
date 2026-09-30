@@ -13,10 +13,10 @@ export class PgVectorDocumentRepository implements DocumentStorageRepository {
   // Retrieval remains read-only for the MVP; ingestion writes should go through
   // storeDocumentChunks after LangGraph completes formatting and embedding.
   searchSimilarContexts(
-    question: string,
+    queryEmbedding: number[],
     limit: number,
   ): Promise<RetrievedContext[]> {
-    return this.vectorConnection.searchSimilarContexts(question, limit);
+    return this.vectorConnection.searchSimilarContexts(queryEmbedding, limit);
   }
 
   storeDocumentChunks(chunks: EmbeddedDocumentChunk[]): Promise<boolean> {

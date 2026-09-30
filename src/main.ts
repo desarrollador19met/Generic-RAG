@@ -27,7 +27,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('client-api/swagger', app, document, {});
 
-  app.setGlobalPrefix('genrag//v1');
+  app.setGlobalPrefix('api/v1');
 
   await app.listen(config.app.port ?? 3000);
 

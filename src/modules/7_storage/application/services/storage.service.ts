@@ -14,10 +14,10 @@ export class StorageService {
   ) {}
 
   searchSimilarContexts(
-    question: string,
+    queryEmbedding: number[],
     limit: number,
   ): Promise<RetrievedContext[]> {
-    return this.repository.searchSimilarContexts(question, limit);
+    return this.repository.searchSimilarContexts(queryEmbedding, limit);
   }
 
   storeDocumentChunks(chunks: EmbeddedDocumentChunk[]): Promise<boolean> {

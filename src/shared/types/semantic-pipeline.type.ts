@@ -9,6 +9,7 @@ export interface RetrievedContext {
   source: string;
   content: string;
   score: number;
+  metadata?: Record<string, unknown>;
 }
 
 export interface EmbeddedDocumentChunk extends FormattedIngestionChunk {

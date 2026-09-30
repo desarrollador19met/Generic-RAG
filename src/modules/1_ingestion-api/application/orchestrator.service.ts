@@ -11,8 +11,6 @@ import {
   type IngestionFormatPort,
   type IngestionFormatInput,
 } from './ports/ingestion-format.port';
-import { getBotIdentityFromContext as context } from '~/shared/middleware/context/decorators/injectBotIdentity';
-import { type BotEntity } from '~/shared/middleware/context/types/context.types';
 import { LoggerService } from '~/shared/logging/main.logger';
 
 
@@ -21,7 +19,6 @@ export class DocumentIngestionService {
   private readonly logger = new LoggerService('IngestionController');
   constructor(
     @Inject(INGESTION_ADAPTERS) private readonly formatAdapters: IngestionFormatPort[],
-    @context() private readonly botIdentity: BotEntity,
     private readonly embedding: EmbeddingService,
     private readonly storage: StorageService,
   ) { }
@@ -41,12 +38,12 @@ export class DocumentIngestionService {
     input: IngestionFormatInput,
   ): Promise<IngestionResult> {
     const initialTime = new Date();
-    this.logger.log(`Initialiing ingesting process of ${type} document, by ${this.botIdentity.id} - ${this.botIdentity.name} for `);
+    this.logger.log(`Initializing ingestion process for ${type} source ${input.source}`);
     const adapter = this.getAdapter(type);
     const chunks = await adapter.format(input);
     const endtime = new Date();
-    this.logger.log(`Ingesting process completed in ${endtime.getTime() - initialTime.getTime()} ms`);
-    this.logger.log(`Initialiing embedding process of ${chunks.length} chunks for ${type} document`);
+    this.logger.log(`Formatting process completed in ${endtime.getTime() - initialTime.getTime()} ms`);
+    this.logger.log(`Initializing embedding process of ${chunks.length} chunks for ${type} document`);
     const embeddedChunks = await Promise.all(
       chunks.map<Promise<EmbeddedDocumentChunk>>(async (chunk) => ({
         ...chunk,
@@ -54,7 +51,7 @@ export class DocumentIngestionService {
       })),
     );
     this.logger.log(`Embedding process completed in ${new Date().getTime() - endtime.getTime()} ms`);
-    this.logger.log(`Initialiing storing process of ${embeddedChunks.length} chunks for ${type} document`);
+    this.logger.log(`Initializing storing process of ${embeddedChunks.length} chunks for ${type} document`);
     const stored = await this.storage.storeDocumentChunks(embeddedChunks);
     this.logger.log(`Storing process completed in ${new Date().getTime() - endtime.getTime()} ms`);
     this.logger.log(`Ingesting process completed for ${type} document with ${embeddedChunks.length} chunks`);

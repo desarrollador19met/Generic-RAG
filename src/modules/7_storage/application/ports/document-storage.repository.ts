@@ -5,7 +5,7 @@ import type {
 
 export interface DocumentStorageRepository {
   searchSimilarContexts(
-    question: string,
+    queryEmbedding: number[],
     limit: number,
   ): Promise<RetrievedContext[]>;
 

@@ -4,7 +4,7 @@ import { HttpClientService } from '~/modules/6_http';
 import {
   type ChunkTextInput,
   type LlmPort,
-  type LlmChunkingProviderName,
+  LlmChunkingProviderName,
   type LlmConfig,
   LLM_PROVIDER_CONFIG,
 } from '../../domain/ports/llm-chunking.port';
@@ -23,6 +23,7 @@ export class OpenAiLlmService implements LlmPort {
     if (!this.config.API_KEY) throw new OpenAiNoFoundError('OpenAI LLM api key not configured.', OpenAiLlmService.name, config);
     if (!this.config.BASE_URL) throw new OpenAiNoFoundError('OpenAI LLM base url not configured.', OpenAiLlmService.name, config);
     if (!this.config.PROVIDER_NAME) throw new OpenAiNoFoundError('OpenAI LLM provider name not configured.', OpenAiLlmService.name, config);
+    this.providerName = LlmChunkingProviderName.openai;
   }
 
   private setupChunkPrompt(source: string, format: string, text: string, prompt?: string) {

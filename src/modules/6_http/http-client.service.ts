@@ -3,7 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { AxiosError, AxiosRequestConfig } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
 
-import logger from '~/logger';
+import { LoggerService } from '~/shared/logging/main.logger';
+
+const logger = new LoggerService('HttpClientService');
 
 export interface HttpClientConfig {
   headers?: Record<string, string>;

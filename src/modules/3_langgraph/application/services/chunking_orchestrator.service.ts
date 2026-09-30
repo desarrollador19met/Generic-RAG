@@ -8,11 +8,15 @@ export class ChunkingOrchestratorService {
     @Inject(SEMANTIC_CHUNKING_ADAPTER) private readonly graphAdapter: ChunkingLangChainPort,
   ) { }
 
-  plan(question: string): Promise<string[]> {
-    return this.graphAdapter.plan(question);
+  chunkPdf(input: string): Promise<string[]> {
+    return this.graphAdapter.chunkPdf(input);
   }
 
-  synthesize(question: string, contexts: RetrievedContext[]): Promise<string> {
-    return this.graphAdapter.synthesize(question, contexts);
+  chunkText(input: string): Promise<string[]> {
+    return this.graphAdapter.chunkText(input);
+  }
+
+  chunkCustom(input: string): Promise<string[]> {
+    return this.graphAdapter.chunkCustom(input);
   }
 }

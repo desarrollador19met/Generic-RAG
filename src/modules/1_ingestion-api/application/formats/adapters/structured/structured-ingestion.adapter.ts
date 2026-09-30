@@ -21,11 +21,20 @@ export class StructuredIngestionAdapter implements IngestionFormatPort {
   async format(
     input: IngestionFormatInput,
   ): Promise<FormattedIngestionChunk[]> {
-    const serialized = JSON.stringify(input.data ?? {}, null, 2);
+    const serialized = typeof input.data === 'string'
+      ? this.normalizeStructuredString(input.data)
+      : JSON.stringify(input.data ?? {}, null, 2);
     const chunksProcessed = await this.chunker.chunkCustom({
       source: input.source,
       type: this.type,
       content: serialized,
+      metadata: {
+        recordFormat: Array.isArray(input.data)
+          ? 'array'
+          : typeof input.data === 'string'
+            ? 'string'
+            : 'object',
+      },
     });
 
     if (chunksProcessed.length === 0)
@@ -38,5 +47,13 @@ export class StructuredIngestionAdapter implements IngestionFormatPort {
       `Processed ${chunksProcessed.length} chunks from structured source ${input.source}`,
     );
     return chunksProcessed;
+  }
+
+  private normalizeStructuredString(input: string): string {
+    try {
+      return JSON.stringify(JSON.parse(input), null, 2);
+    } catch {
+      return input;
+    }
   }
 }

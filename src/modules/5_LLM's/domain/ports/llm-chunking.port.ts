@@ -22,9 +22,11 @@ export interface ChunkTextInput {
   text: string;
   source: string;
   maxChunkLength?: number;
+  overlap?: number;
 }
 
 export interface LlmPort {
   readonly providerName: LlmChunkingProviderName;
+  chunkText(input: ChunkTextInput): Promise<string[] | undefined>;
   embedText(input: string): Promise<number[] | undefined>;
 }

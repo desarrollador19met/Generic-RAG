@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import pdf from 'pdf-parse';
 import { ChunkingService } from '~/modules/2_chunker/application/chunking.service';
 import type {
   IngestionFormatPort,
@@ -21,7 +22,7 @@ export class PdfIngestionAdapter implements IngestionFormatPort {
   async format(
     input: IngestionFormatInput,
   ): Promise<FormattedIngestionChunk[]> {
-    const extractedText = this.extractReadableText(input);
+    const extractedText = await this.extractReadableText(input);
     const chunksProcessed = await this.chunker.chunkPDF({
       source: input.source,
       type: this.type,
@@ -44,11 +45,16 @@ export class PdfIngestionAdapter implements IngestionFormatPort {
     return chunksProcessed;
   }
 
-  private extractReadableText(input: IngestionFormatInput): string {
-    const rawText = input.file?.buffer.toString('utf8') ?? '';
-    const sanitizedText = rawText
-      .replace(/[^\u0009\u000A\u000D\u0020-\u007E]/g, ' ')
-      .replace(/\s+/g, ' ')
+  private async extractReadableText(input: IngestionFormatInput): Promise<string> {
+    if (!input.file?.buffer) {
+      return '';
+    }
+
+    const parsed = await pdf(input.file.buffer);
+    const sanitizedText = parsed.text
+      .replace(/\r/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/[ \t]+/g, ' ')
       .trim();
 
     return sanitizedText;

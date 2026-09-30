@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  HttpException,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -38,6 +39,9 @@ export class IngestionController {
 
       return this.documentIngestion.ingest(sourceType.Text, parsed.data);
     } catch (error: unknown) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Error ingesting text data', errorMessage);
       throw new InternalServerError('Failed to ingest text data');
@@ -59,6 +63,9 @@ export class IngestionController {
 
       return this.documentIngestion.ingest(sourceType.Structured, parsed.data);
      } catch (error: unknown) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Error ingesting structured data', errorMessage);
       throw new InternalServerError('Failed to ingest structured data');
@@ -91,6 +98,9 @@ export class IngestionController {
 
     return this.documentIngestion.ingest(sourceType.Pdf, parsed.data);
     } catch (error: unknown) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Error ingesting PDF', errorMessage);
       throw new InternalServerError('Failed to ingest PDF');

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EmbeddingModule } from '../4_embedding/embedding.module';
-import { FormatterModule } from '../2_chunker/chunking.module';
+import { ChunkingModule } from '../2_chunker/chunking.module';
 import { StorageModule } from '../7_storage/storage.module';
 import { PdfIngestionAdapter } from './application/formats/adapters/pdf/pdf-ingestion.adapter';
 import { StructuredIngestionAdapter } from './application/formats/adapters/structured/structured-ingestion.adapter';
@@ -10,7 +10,7 @@ import { IngestionController } from './presentation/controllers/ingestion.contro
 import { INGESTION_ADAPTERS } from './application/ports/ingestion-format.port';
 
 @Module({
-  imports: [EmbeddingModule, FormatterModule, StorageModule],
+  imports: [EmbeddingModule, ChunkingModule, StorageModule],
   controllers: [IngestionController],
   providers: [
     PdfIngestionAdapter,

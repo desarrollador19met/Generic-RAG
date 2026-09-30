@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { HttpClientService } from '~/modules/6_http';
 import {
   type LlmPort,
-  type LlmChunkingProviderName,
+  LlmChunkingProviderName,
   type LlmConfig,
   LLM_PROVIDER_CONFIG,
   ChunkTextInput,
@@ -24,6 +24,7 @@ export class GeminiLlmService implements LlmPort {
     if (!this.config.API_KEY) throw new GeminiNoFoundError('Gemini LLM api key not configured.', GeminiLlmService.name, config);
     if (!this.config.BASE_URL) throw new GeminiNoFoundError('Gemini LLM base url not configured.', GeminiLlmService.name, config);
     if (!this.config.PROVIDER_NAME) throw new GeminiNoFoundError('Gemini LLM provider name not configured.', GeminiLlmService.name, config);
+    this.providerName = LlmChunkingProviderName.gemini;
   }
 
   private setupChunkPrompt(source: string, format: string, text: string, prompt?: string) {
@@ -64,7 +65,23 @@ export class GeminiLlmService implements LlmPort {
 
     if (!text) throw new GeminiGatewayError('Gemini chunking response was empty.', GeminiLlmService.name, `res: ${text}, \n url: ${url}`);
 
-    return JSON.parse(text);
+    const parsed = JSON.parse(text) as { chunks?: unknown } | string[];
+
+    if (Array.isArray(parsed)) {
+      return parsed
+        .filter((chunk): chunk is string => typeof chunk === 'string')
+        .map((chunk) => chunk.trim())
+        .filter((chunk) => chunk.length > 0);
+    }
+
+    if (!Array.isArray(parsed.chunks)) {
+      throw new GeminiGatewayError('Gemini chunking response did not contain a chunks array.', GeminiLlmService.name, text);
+    }
+
+    return parsed.chunks
+      .filter((chunk): chunk is string => typeof chunk === 'string')
+      .map((chunk) => chunk.trim())
+      .filter((chunk) => chunk.length > 0);
   }
 
   async embedText(input: string): Promise<number[] | undefined> {
