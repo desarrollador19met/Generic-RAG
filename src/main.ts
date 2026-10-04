@@ -19,7 +19,7 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Generic RAG API')
+    .setTitle('GenRag API')
     .setDescription(
       'Document ingestion (PDF/XLSX/TXT/JSON) and semantic retrieval',
     )

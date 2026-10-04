@@ -47,7 +47,7 @@ function vectorDatabaseUrl(): string | undefined {
 
 const configuration = {
   app: {
-    name: 'gen-rag',
+    name: 'GenRag',
     env: process.env['APP_ENV']!,
     port: Number.parseInt(process.env['APP_PORT']!),
     apiUrl: process.env['APP_API_URL']!,

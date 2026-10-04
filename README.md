@@ -1,4 +1,4 @@
-# Generic RAG MVP
+# GenRag MVP
 
 NestJS microservice that turns documents into retrievable, citable evidence for an **external** LLM server.
 
